@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    private float _runManaTimer = 0f;
     // Components
     private Rigidbody2D _rb;
     private Animator _animator;
@@ -17,6 +18,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private int _hpRegenPerSec = 1;
     [SerializeField] private int _mpRegenPerSec = 1;
     private float _regenTimer = 0f;
+
+    // Mana cost when running
+    [Header("Run Mana Settings")]
+    [SerializeField] private int _runManaCost = 1;
+    [SerializeField] private float _runManaInterval = 1f;
 
     // Movement
     [Header("Movement Settings")]
@@ -94,6 +100,52 @@ public class PlayerController : MonoBehaviour
     }
     #endregion
 
+    #region Movement
+    private void HandleMovement()
+    {
+
+        float horizontalInput = Input.GetAxisRaw(GameConfig.HORIZONTAL_INPUT);
+
+        //Flip Player
+        UpdateSpriteDirection(horizontalInput);
+
+        // Stop Movement when Defending
+        if (_isDefending) return;
+
+        //Change Animation
+        bool wantRun = Input.GetKey(KeyCode.Space);
+        bool canRun = wantRun && _currentMP > 0;
+        float blend = Mathf.Abs(horizontalInput) > 0.1f ? (canRun ? 1f : 0.5f) : 0f;
+        _animator.SetFloat(GameConfig.MOVING_STATE, blend);
+        float moveSpeed = canRun ? _runSpeed : _walkSpeed;
+        _rb.linearVelocity = new Vector2(horizontalInput * moveSpeed, _rb.linearVelocity.y);
+        
+        // Reduce Mana when Running
+        if (canRun && Mathf.Abs(horizontalInput) > 0.1f)
+        {
+            _runManaTimer += Time.deltaTime;
+            if (_runManaTimer >= _runManaInterval)
+            {
+                if (!UseMana(_runManaCost))
+                {
+                    // If out of mana, cannot run (canRun will be false in the next frame)
+                }
+                _runManaTimer = 0f;
+            }
+        }
+        else
+        {
+            _runManaTimer = 0f;
+        }
+    }
+
+    private void UpdateSpriteDirection(float horizontalInput)
+    {
+        if (horizontalInput == 0) return;
+        _spriteRenderer.flipX = horizontalInput < 0;
+    }
+    #endregion
+
     #region HP/MP
     private void HandleRegen()
     {
@@ -105,7 +157,6 @@ public class PlayerController : MonoBehaviour
             _regenTimer = 0f;
         }
     }
-
     public bool UseMana(int amount)
     {
         if (_currentMP >= amount)
@@ -115,29 +166,13 @@ public class PlayerController : MonoBehaviour
         }
         return false;
     }
-    #endregion
-
-    #region Movement
-    private void HandleMovement()
+    public void RegenMp(int amount)
     {
-
-        float horizontalInput = Input.GetAxisRaw(GameConfig.HORIZONTAL_INPUT);
-        //Flip Player
-        UpdateSpriteDirection(horizontalInput);
-        // Stop Movement when Defending
-        if (_isDefending) return;
-        //Change Animation
-        bool isRunning = Input.GetKey(KeyCode.Space);
-        float blend = Mathf.Abs(horizontalInput) > 0.1f ? (isRunning ? 1f : 0.5f) : 0f;
-        _animator.SetFloat(GameConfig.MOVING_STATE, blend);
-        float moveSpeed = isRunning ? _runSpeed : _walkSpeed;
-        _rb.linearVelocity = new Vector2(horizontalInput * moveSpeed, _rb.linearVelocity.y);
+        _currentMP = Mathf.Min(_currentMP + amount, _maxMP);
     }
-
-    private void UpdateSpriteDirection(float horizontalInput)
+    public void RegenHp(int amount)
     {
-        if (horizontalInput == 0) return;
-        _spriteRenderer.flipX = horizontalInput < 0;
+        _currentHP = Mathf.Min(_currentHP + amount, _maxHP);
     }
     #endregion
 
