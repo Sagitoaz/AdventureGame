@@ -4,6 +4,7 @@ using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEditor.Callbacks;
 using UnityEngine;
 using System.Collections.Generic;
+using NUnit.Framework.Interfaces;
 
 public enum BossState
 {
@@ -89,6 +90,9 @@ public class BossController : MonoBehaviour
 
     private bool unBeatable = false;
 
+    private bool berserkerMode = false;
+    public bool BerserkerMode => berserkerMode;
+
     private bool hitPlayer = false;
     private BossState curState;
 
@@ -131,10 +135,16 @@ public class BossController : MonoBehaviour
         }
 
         animator.SetTrigger(GameConfig.BOSS_HURT_TRIGGER);
+
         if (_currentHP == 0)
         {
             animator.SetTrigger(GameConfig.BOSS_DIE_TRIGGER);
             isDie = true;
+        }
+        else if (_currentHP < _maxHP / 2)
+        {
+            berserkerMode = true;
+            
         }
     }
     private void DashAtk()
@@ -186,18 +196,18 @@ public class BossController : MonoBehaviour
     private void Stop()
     {
         rb2D.linearVelocity = new Vector2(0, 0);
-        animator.SetBool(GameConfig.BOSS_CHASE_BOOL, false);
+        
         
     }
     private void OnMove()
     {
         rb2D.linearVelocity = GetDirFromBossToPlayer().normalized * speed;
-        animator.SetBool(GameConfig.BOSS_CHASE_BOOL, true);
+        
         
     }
     private void OnIdle()
     {
-
+        animator.SetBool(GameConfig.BOSS_CHASE_BOOL, false);
         float range = GetRangeFromBossToPlayer();
         if (range <= rangeDetect * rangeDetect)
         {
@@ -207,10 +217,12 @@ public class BossController : MonoBehaviour
     }
     private void OnChase()
     {
+        animator.SetBool(GameConfig.BOSS_CHASE_BOOL, true);
         float range = GetRangeFromBossToPlayer();
         if (range <= rangeDashAtk * rangeDashAtk)
         {
             curState = BossState.Attack;
+            animator.SetBool(GameConfig.BOSS_CHASE_BOOL, false);
             Stop();
         }
         else if (range <= rangeDetect * rangeDetect)
@@ -227,9 +239,9 @@ public class BossController : MonoBehaviour
     }
     private void OnAtk()
     {
-
+        
         float range = GetRangeFromBossToPlayer();
-
+        
         if (range <= rangeDashAtk * rangeDashAtk && curCoolDownDashAtk >= coolDownDashAtk)
         {
             curCoolDownDashAtk = 0f;
