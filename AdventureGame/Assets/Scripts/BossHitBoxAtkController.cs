@@ -18,6 +18,7 @@ public class BossHitBoxAtkController : MonoBehaviour
             if (gameObject.GetComponentInParent<BossController>().BerserkerMode)
             {
                 damage *= 2;
+                
                  
             }
             gameObject.GetComponentInParent<BossController>().PlayerController.Damage(damage);

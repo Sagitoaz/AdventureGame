@@ -143,12 +143,17 @@ public class BossController : MonoBehaviour
         }
         else if (_currentHP < _maxHP / 2)
         {
+            if (berserkerMode == false)
+            {
+                coolDownDashAtk = 3f;
+            }
             berserkerMode = true;
             
         }
     }
     private void DashAtk()
     {
+        unBeatable = true;
         hitBoxAtk.SetDamage(dashAtkDamage);
         isAttack = true;
         isDashAtk = true;
@@ -259,6 +264,7 @@ public class BossController : MonoBehaviour
         }
         else if (range <= rangeKickAtk * rangeKickAtk && curCoolDownKickAtk >= coolDownKickAtk)
         {
+            unBeatable = true;
             curCoolDownKickAtk = 0f;
             isAttack = true;
             hitPlayer = false;
