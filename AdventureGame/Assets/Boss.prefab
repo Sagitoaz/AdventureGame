@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 936705514203994968}
   m_Layer: 7
   m_Name: Boss
-  m_TagString: Untagged
+  m_TagString: Boss
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -202,28 +202,28 @@ MonoBehaviour:
   playerController: {fileID: 0}
   hitBoxAtk: {fileID: 1550672349350671665}
   rangeDetect: 20
-  _maxHP: 100
-  _currentHP: 100
+  _maxHP: 500
+  _currentHP: 500
   _hpRegenPerSec: 0
   speed: 3
   rangeAtkJJ: 2
   normalDamageAtkJJ: 10
-  critDamageAtkJJ: 20
-  coolDownAtkJJ: 10
+  critDamageAtkJJ: 15
+  coolDownAtkJJ: 5
   curCoolDownAtkJJ: 0
   rangeAtkJK: 3
-  normalDamageAtkJK: 15
-  critDamageAtkJK: 30
-  coolDownAtkJK: 10
+  normalDamageAtkJK: 10
+  critDamageAtkJK: 20
+  coolDownAtkJK: 6
   curCoolDownAtkJK: 0
-  rangeDashAtk: 5
+  rangeDashAtk: 10
   dashAtkDamage: 10
   _dashSpeed: 10
-  coolDownDashAtk: 3
+  coolDownDashAtk: 10
   curCoolDownDashAtk: 0
   rangeKickAtk: 2.5
   kickAtkDamage: 20
-  coolDownKickAtk: 2
+  coolDownKickAtk: 3
   curCoolDownKickAtk: 0
 --- !u!1 &4109107107523419709
 GameObject:

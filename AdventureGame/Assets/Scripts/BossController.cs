@@ -28,6 +28,8 @@ public class BossController : MonoBehaviour
 
     private SpriteRenderer spriteRenderer;
 
+    [SerializeField] private GameObject hiddenFloor;
+
     [SerializeField] private PlayerController playerController;
     public PlayerController PlayerController => playerController;
 
@@ -128,33 +130,42 @@ public class BossController : MonoBehaviour
         if (!unBeatable)
         {
             _currentHP -= damaged;
+            animator.SetTrigger(GameConfig.BOSS_HURT_TRIGGER);
         }
         if (_currentHP <= 0)
         {
             _currentHP = 0;
         }
 
-        animator.SetTrigger(GameConfig.BOSS_HURT_TRIGGER);
-
         if (_currentHP == 0)
         {
+            hiddenFloor.SetActive(true);
             animator.SetTrigger(GameConfig.BOSS_DIE_TRIGGER);
             isDie = true;
         }
         else if (_currentHP < _maxHP / 2)
         {
+            if (!berserkerMode)
+            {
+                coolDownDashAtk = 3f;
+            }
             berserkerMode = true;
             
         }
     }
+    public void OnBossDeath()
+    {
+        Destroy(gameObject);
+    }
     private void DashAtk()
     {
+        unBeatable = true;
         hitBoxAtk.SetDamage(dashAtkDamage);
         isAttack = true;
         isDashAtk = true;
         hitPlayer = false;
         animator.SetTrigger(GameConfig.BOSS_DASH_ATK_TRIGGER);
-        
+
     }
     private void AtkJK()
     {
@@ -259,6 +270,7 @@ public class BossController : MonoBehaviour
         }
         else if (range <= rangeKickAtk * rangeKickAtk && curCoolDownKickAtk >= coolDownKickAtk)
         {
+            unBeatable = true;
             curCoolDownKickAtk = 0f;
             isAttack = true;
             hitPlayer = false;
