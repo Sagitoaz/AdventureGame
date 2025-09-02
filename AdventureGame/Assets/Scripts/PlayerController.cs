@@ -1,4 +1,3 @@
-using System.Data;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -436,6 +435,7 @@ public class PlayerController : MonoBehaviour
         _rb.linearVelocity = Vector2.zero;
         GameManager.Instance.SetGameSpeed(0.5f);
         _currentAttackType = AttackType.Ultimate;
+        GameManager.Instance.ZoomIn();
     }
 
     // Animation Event
@@ -444,6 +444,7 @@ public class PlayerController : MonoBehaviour
         _isUltimate = false;
         CancelAttack();
         GameManager.Instance.SetGameSpeed(1f);
+        GameManager.Instance.ZoomOut();
     }
     #endregion
 
