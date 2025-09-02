@@ -18,4 +18,6 @@ public class GameConfig
     public static string U_ATK_TRIGGER = "U_ATK";
     public static string K_U_ATK_TRIGGER = "K_U_ATK";
     public static string ULTIMATE_TRIGGER = "ULTIMATE";
+    public static string HIT_TRIGGER = "HIT";
+    public static string DEAD_TRIGGER = "DEAD";
 }

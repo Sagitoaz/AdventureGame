@@ -9,8 +9,12 @@ public class PlayerController : MonoBehaviour
     private Animator _animator;
     private SpriteRenderer _spriteRenderer;
 
+    [Header("Position")]
+    [SerializeField] private Transform _startPosition;
+
     // Stats
     [Header("Stats")]
+    [SerializeField] private bool _isDead = false;
     [SerializeField] private int _maxHP = 100;
     [SerializeField] private int _maxMP = 100;
     [SerializeField] private int _currentHP = 100;
@@ -49,6 +53,18 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private bool _isUAttacking = false;
     [SerializeField] private bool _isKUAttacking = false;
     [SerializeField] private bool _isUltimate = false;
+    [Header("Attack Damage Settings")]
+    [SerializeField] private int _comboAttack1Damage = 10;
+    [SerializeField] private int _comboAttack2Damage = 15;
+    [SerializeField] private int _comboAttack3Damage = 20;
+    [SerializeField] private int _airAttackDamage = 12;
+    [SerializeField] private int _dashAttackDamage = 18;
+    [SerializeField] private int _uAttackDamage = 25;
+    [SerializeField] private int _kuAttackDamage = 30;
+    [SerializeField] private int _ultimateAttackDamage = 50;
+
+    private enum AttackType { None, Combo1, Combo2, Combo3, Air, Dash, U, KU, Ultimate }
+    private AttackType _currentAttackType = AttackType.None;
 
     // Dash
     [Header("Dash Settings")]
@@ -66,9 +82,12 @@ public class PlayerController : MonoBehaviour
         _animator = GetComponent<Animator>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _originalGravityScale = _rb.gravityScale;
+        transform.position = _startPosition.position;
     }
     private void Update()
     {
+        if (_isDead) return;
+
         HandleDefend();
         HandleJump();
         HandleMovement();
@@ -78,6 +97,12 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         CheckGround();
+
+        UIManager.Instance.UpdateHealthBar((float)_currentHP / _maxHP);
+        UIManager.Instance.UpdateManaBar((float)_currentMP / _maxMP);
+
+        if (_isDead) return;
+
         if (_isDefending) return;
 
         if (_isUltimate) return;
@@ -118,8 +143,10 @@ public class PlayerController : MonoBehaviour
         float blend = Mathf.Abs(horizontalInput) > 0.1f ? (canRun ? 1f : 0.5f) : 0f;
         _animator.SetFloat(GameConfig.MOVING_STATE, blend);
         float moveSpeed = canRun ? _runSpeed : _walkSpeed;
+
         _rb.linearVelocity = new Vector2(horizontalInput * moveSpeed, _rb.linearVelocity.y);
-        
+        SoundManager.Instance.PlayLoop(blend > 0 ? SoundManager.Instance._run : null);
+
         // Reduce Mana when Running
         if (canRun && Mathf.Abs(horizontalInput) > 0.1f)
         {
@@ -190,10 +217,12 @@ public class PlayerController : MonoBehaviour
                 if (!_isAttacking)
                 {
                     StartAttackCombo(1);
+                    SoundManager.Instance.PlayClip(SoundManager.Instance._normalAttack);
                 }
                 else if (_canQueue && _comboStep < 3)
                 {
                     QueueNext(_comboStep + 1);
+                    SoundManager.Instance.PlayClip(SoundManager.Instance._normalAttack);
                 }
             }
             else
@@ -254,6 +283,21 @@ public class PlayerController : MonoBehaviour
         _animator.SetTrigger(GameConfig.IS_ATTACK);
         _animator.SetInteger(GameConfig.ATTACK_STATE, index);
         _animator.SetBool(GameConfig.ATTACK_QUEUE, false);
+        switch (index)
+        {
+            case 1:
+                _currentAttackType = AttackType.Combo1;
+                break;
+            case 2:
+                _currentAttackType = AttackType.Combo2;
+                break;
+            case 3:
+                _currentAttackType = AttackType.Combo3;
+                break;
+            default:
+                _currentAttackType = AttackType.None;
+                break;
+        }
     }
     private void QueueNext(int nextIndex)
     {
@@ -310,6 +354,8 @@ public class PlayerController : MonoBehaviour
         _isAttacking = true;
         CancelAtkCombo();
         _animator.SetTrigger(GameConfig.AIR_ATK_TRIGGER);
+        _currentAttackType = AttackType.Air;
+        SoundManager.Instance.PlayClip(SoundManager.Instance._normalAttack);
     }
     #endregion
 
@@ -322,6 +368,8 @@ public class PlayerController : MonoBehaviour
         CancelAtkCombo();
         _animator.SetTrigger(GameConfig.DASH_ATK_TRIGGER);
         _rb.gravityScale = 0f;
+        _currentAttackType = AttackType.Dash;
+        SoundManager.Instance.PlayClip(SoundManager.Instance._normalAttack);
     }
 
     // Animation Event
@@ -345,6 +393,8 @@ public class PlayerController : MonoBehaviour
         _isAttacking = true;
         CancelAtkCombo();
         _animator.SetTrigger(GameConfig.U_ATK_TRIGGER);
+        _currentAttackType = AttackType.U;
+        SoundManager.Instance.PlayClip(SoundManager.Instance._normalAttack);
     }
 
     // Animation Event
@@ -362,6 +412,8 @@ public class PlayerController : MonoBehaviour
         _isAttacking = true;
         CancelAtkCombo();
         _animator.SetTrigger(GameConfig.K_U_ATK_TRIGGER);
+        _currentAttackType = AttackType.KU;
+        SoundManager.Instance.PlayClip(SoundManager.Instance._normalAttack);
     }
 
     // Animation Event
@@ -379,8 +431,11 @@ public class PlayerController : MonoBehaviour
         _isAttacking = true;
         CancelAtkCombo();
         _animator.SetTrigger(GameConfig.ULTIMATE_TRIGGER);
+        SoundManager.Instance.PlayClip(SoundManager.Instance._playerUltimate);
+        SoundManager.Instance.PlayClip(SoundManager.Instance._heavyAttack);
         _rb.linearVelocity = Vector2.zero;
         GameManager.Instance.SetGameSpeed(0.5f);
+        _currentAttackType = AttackType.Ultimate;
     }
 
     // Animation Event
@@ -423,6 +478,7 @@ public class PlayerController : MonoBehaviour
             CancelAttack();
             _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, _jumpForce);
             _animator.SetTrigger(GameConfig.JUMP_TRIGGER);
+            SoundManager.Instance.PlayClip(SoundManager.Instance._jump);
         }
     }
     private void CheckGround()
@@ -466,12 +522,64 @@ public class PlayerController : MonoBehaviour
 
     public void Damage(int amount)
     {
+        if (_isDefending) return;
         _currentHP -= amount;
+        _animator.SetTrigger(GameConfig.HIT_TRIGGER);
+        SoundManager.Instance.PlayClip(SoundManager.Instance._playerHit);
+        CancelAttack();
+        CancelDash();
+        if (GameManager.Instance.GetGameSpeed() < 1f)
+        {
+            GameManager.Instance.SetGameSpeed(1f);
+        }
         if (_currentHP <= 0)
         {
             _currentHP = 0;
-            // Handle Player Death (not implemented)
+            if (!_isDead)
+            {
+                _isDead = true;
+                _animator.SetTrigger(GameConfig.DEAD_TRIGGER);
+            }
         }
     }
 
+    public int GetCurrentAttackDamage()
+    {
+        switch (_currentAttackType)
+        {
+            case AttackType.Combo1:
+                return _comboAttack1Damage;
+            case AttackType.Combo2:
+                return _comboAttack2Damage;
+            case AttackType.Combo3:
+                return _comboAttack3Damage;
+            case AttackType.Air:
+                return _airAttackDamage;
+            case AttackType.Dash:
+                return _dashAttackDamage;
+            case AttackType.U:
+                return _uAttackDamage;
+            case AttackType.KU:
+                return _kuAttackDamage;
+            case AttackType.Ultimate:
+                return _ultimateAttackDamage;
+            default:
+                return 0;
+        }
+    }
+
+    public void OnPlayerDeath()
+    {
+        Debug.Log("Player Died");
+    }
+
+    public void ReturnToLastPosition()
+    {
+        transform.position = _startPosition.position;
+    }
+
+    public void SetStartPosition(Transform startPosition)
+    {
+        _startPosition = startPosition;
+    }
 }
