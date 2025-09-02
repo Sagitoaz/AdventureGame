@@ -7,14 +7,22 @@ public class PlayerSword : MonoBehaviour
     [SerializeField] PlayerController player;
     private void OnTriggerEnter2D(Collider2D other)
     {
-        IDamageable enemy = other.GetComponent<IDamageable>();
-        if (enemy != null)
+        if (other.CompareTag("Boss"))
         {
-            if (_canDamage)
+            BossController boss = other.GetComponent<BossController>();
+            boss.GetDamaged(player.GetCurrentAttackDamage());
+        }
+        else
+        {
+            IDamageable enemy = other.GetComponent<IDamageable>();
+            if (enemy != null)
             {
-                enemy.Damage(player.GetCurrentAttackDamage());
-                _canDamage = false;
-                StartCoroutine(ResetDamage());
+                if (_canDamage)
+                {
+                    enemy.Damage(player.GetCurrentAttackDamage());
+                    _canDamage = false;
+                    StartCoroutine(ResetDamage());
+                }
             }
         }
     }
