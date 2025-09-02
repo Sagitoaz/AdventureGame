@@ -20,4 +20,24 @@ public class GameConfig
     public static string ULTIMATE_TRIGGER = "ULTIMATE";
     public static string HIT_TRIGGER = "HIT";
     public static string DEAD_TRIGGER = "DEAD";
+
+    public static string BOSS_CHASE_BOOL = "Chase";
+
+    public static string BOSS_DASH_ATK_TRIGGER = "DashAtk";
+
+    public static string BOSS_ATKJJ1_TRIGGER = "AtkJJ1";
+
+    public static string BOSS_ATKJJ2_BOOL = "AtkJJ2";
+
+    public static string BOSS_ATKJK1_TRIGGER = "AtkJK1";
+
+    public static string BOSS_ATKJK2_BOOL = "AtkJK2";
+
+    public static string BOSS_ATKJK3_BOOL = "AtkJK3";
+
+    public static string BOSS_KICK_TRIGGER = "Kick";
+
+    public static string BOSS_HURT_TRIGGER = "BeHurt";
+
+    public static string BOSS_DIE_TRIGGER = "Die";
 }

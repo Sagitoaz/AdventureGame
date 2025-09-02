@@ -14,7 +14,7 @@ TagManager:
   - Water
   - UI
   - 
-  - 
+  - Boss
   - Ground
   - Sword
   - Player
@@ -22,7 +22,7 @@ TagManager:
   - Enemy
   - EnemyAttack
   - Trap
-  - 
+  - BossAtk
   - 
   - 
   - 
