@@ -127,8 +127,16 @@ public class BossController : MonoBehaviour
     }
     public void GetDamaged(int damaged)
     {
+        if (isDie)
+        {
+            return;
+        }
         if (!unBeatable)
         {
+            if (isAttack)
+            {
+                EndAtk();
+            }
             _currentHP -= damaged;
             animator.SetTrigger(GameConfig.BOSS_HURT_TRIGGER);
         }
@@ -147,7 +155,7 @@ public class BossController : MonoBehaviour
         {
             if (!berserkerMode)
             {
-                coolDownDashAtk = 3f;
+                coolDownDashAtk /= 2;
             }
             berserkerMode = true;
             
