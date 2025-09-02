@@ -479,6 +479,7 @@ public class PlayerController : MonoBehaviour
             _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, _jumpForce);
             _animator.SetTrigger(GameConfig.JUMP_TRIGGER);
             SoundManager.Instance.PlayClip(SoundManager.Instance._jump);
+            UseMana(5);
         }
     }
     private void CheckGround()
@@ -523,6 +524,7 @@ public class PlayerController : MonoBehaviour
     public void Damage(int amount)
     {
         if (_isDefending) return;
+        if (_isDead) return;
         _currentHP -= amount;
         _animator.SetTrigger(GameConfig.HIT_TRIGGER);
         SoundManager.Instance.PlayClip(SoundManager.Instance._playerHit);
@@ -571,6 +573,7 @@ public class PlayerController : MonoBehaviour
     public void OnPlayerDeath()
     {
         Debug.Log("Player Died");
+        GameManager.Instance.Restart();
     }
 
     public void ReturnToLastPosition()
